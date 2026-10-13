@@ -1,0 +1,8 @@
+import type {Paper} from '../models';
+export interface SearchOptions{query:string;page:number;fromYear:number;toYear:number;openAccess:boolean;type:string}
+export interface ProviderResult{papers:Paper[];total:number;provider:string}
+export interface PaperProvider{name:'OpenAlex'|'Crossref';search(options:SearchOptions):Promise<ProviderResult>}
+export class ProviderError extends Error{constructor(public provider:string,public reason:'rate_limit'|'unavailable'|'credentials'){super(reason)}}
+export function safeUrl(url:unknown):string|null{if(typeof url!=='string')return null;try{const u=new URL(url);return ['http:','https:'].includes(u.protocol)?u.href:null}catch{return null}}
+export function stripMarkup(s:unknown):string|null{return typeof s==='string'?s.replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\s+/g,' ').trim()||null:null}
+export async function fetchProvider(url:URL,provider:string,headers:Record<string,string>={}):Promise<unknown>{for(let attempt=0;attempt<2;attempt++){let response:Response;try{response=await fetch(url,{headers:{Accept:'application/json',...headers},signal:AbortSignal.timeout(11000)})}catch{if(attempt===0)continue;throw new ProviderError(provider,'unavailable')}if(response.ok)return response.json();if(response.status===401||response.status===403)throw new ProviderError(provider,'credentials');if((response.status===429||response.status>=500)&&attempt===0){const retry=Math.min(1500,Math.max(400,Number(response.headers.get('retry-after')??'1')*1000));await new Promise(r=>setTimeout(r,retry));continue}throw new ProviderError(provider,response.status===429?'rate_limit':'unavailable')}throw new ProviderError(provider,'unavailable')}

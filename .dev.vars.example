@@ -1,0 +1,3 @@
+# For local provider credentials only. Copy to .dev.vars; never commit that file.
+OPENALEX_API_KEY=""
+CROSSREF_MAILTO=""

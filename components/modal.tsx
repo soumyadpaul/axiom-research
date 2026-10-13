@@ -1,0 +1,4 @@
+'use client';
+import {Dialog} from 'radix-ui';
+import {X} from 'lucide-react';
+export function Modal({open,onClose,title,description,children,wide=false}:{open:boolean;onClose:()=>void;title:string;description?:string;children:React.ReactNode;wide?:boolean}){return <Dialog.Root open={open} onOpenChange={o=>!o&&onClose()}><Dialog.Portal container={typeof document!=='undefined'?document.getElementById('axiom-root'):undefined}><Dialog.Overlay className="dialog-overlay"/><Dialog.Content className={'modal dialog-content '+(wide?'wide':'')} aria-describedby={description?'dialog-description':undefined}><Dialog.Close asChild><button className="close icon-button" aria-label="Close dialog"><X size={20}/></button></Dialog.Close><Dialog.Title className="dialog-title">{title}</Dialog.Title>{description&&<Dialog.Description id="dialog-description">{description}</Dialog.Description>}{children}</Dialog.Content></Dialog.Portal></Dialog.Root>}

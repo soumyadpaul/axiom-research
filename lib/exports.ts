@@ -1,0 +1,6 @@
+import type {Paper,SavedPaper} from './models';
+const cell=(v:unknown)=>{const raw=String(v??'');const safe=/^[=+@\-\t\r]/.test(raw)?`'${raw}`:raw;return `"${safe.replaceAll('"','""')}"`};
+export function papersCSV(papers:Paper[]):string{return ['Title,Authors,Year,Journal,DOI,Provider,Demo',...papers.map(p=>[p.title,p.authors.join('; '),p.year,p.journal,p.doi,p.provider,p.demo].map(cell).join(','))].join('\r\n')}
+function bib(s:string){return s.replace(/[{}\\]/g,'').replaceAll('\n',' ')}
+export function papersBibtex(papers:Paper[]):string{return papers.filter(p=>!p.demo).map((p,i)=>`@article{axiom${i+1},\n  title={${bib(p.title)}},\n  author={${p.authors.map(bib).join(' and ')}},${p.year?`\n  year={${p.year}},`:''}${p.journal?`\n  journal={${bib(p.journal)}},`:''}${p.doi?`\n  doi={${bib(p.doi)}}`:''}\n}`).join('\n\n')}
+export function downloadPapers(papers:Paper[],format:'csv'|'json'|'bib',saved?:SavedPaper[]){const content=format==='csv'?papersCSV(papers):format==='bib'?papersBibtex(papers):JSON.stringify(saved??papers,null,2);const url=URL.createObjectURL(new Blob([content],{type:format==='json'?'application/json':format==='csv'?'text/csv;charset=utf-8':'application/x-bibtex'}));const a=document.createElement('a');a.href=url;a.download=`axiom-literature.${format}`;a.click();URL.revokeObjectURL(url)}
