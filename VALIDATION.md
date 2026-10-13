@@ -1,35 +1,23 @@
-# Preparation checks — 13 October 2026
+# Streamlit conversion validation
 
-Validated locally using Node.js 24.19.0, the included dependency lockfile and Cloudflare's local Workers runtime.
+Validated on 14 October 2026 using Python 3.12, Streamlit 1.65.0 and Requests 2.34.2.
 
-| Check | Observed result |
+| Check | Result |
 | --- | --- |
-| Dependency installation | npm ci succeeded; jose installed and recorded in lockfile. |
-| Lockfile consistency | Dependency and devDependency maps match package.json. |
-| Lint | Passed after final source changes. |
-| TypeScript | Passed after final source changes. |
-| Unit tests | 19 passed: 10 original research/export tests plus 9 authentication tests. |
-| Production build | Passed after final configuration changes. |
-| Wrangler deploy dry run | Passed; Worker includes DB and ASSETS bindings; no remote deployment occurred. |
-| Local database migration | Applied successfully using Wrangler migrations. |
-| Homepage | Rendered successfully through local development server. |
-| Workspace identity | Spoofed identity headers overwritten by local development identity. |
-| Project and paper saving | Create project, save paper, update notes/status/favorite, and remove paper succeeded. |
-| Persistence | Saved notes and favorite state persisted after stopping and restarting the server. |
-| Cross-origin writes | Rejected with HTTP 403. |
-| Invalid search input | Rejected with HTTP 400. |
-| Production gate | Homepage, workspace API and favicon return HTTP 503 when Access configuration is absent, including requests with forged identity headers. |
-| Development bypass | Local test identity is absent from the generated production Worker bundle. |
-| Deployment guard | Refuses deployment while the D1 database ID is a placeholder. |
+| Automated tests | 20 passed. |
+| Live literature search | OpenAlex and Crossref both returned results for a mathematics query; 40 fetched records displayed, no provider warnings. |
+| Provider normalization | Missing metadata remains unknown; abstracts, links and DOI metadata checked. |
+| Ranking/deduplication | DOI variants merge; false OA values are preserved; relevant titles outrank irrelevant highly cited records. |
+| Export/backup | CSV formula escaping and multiline cells, demo-free BibTeX, backup round trip and non-destructive merge checked. |
+| Session separation | Independent SessionStore objects do not share workspaces. |
+| Interface navigation | All six sections render with Streamlit AppTest. |
+| Interface workflow | Project creation, search, saving a paper, notes/favorite editing and pagination pass AppTest. Search results in this test are explicitly synthetic interface-test records. |
+| Authentication | Wrong password rejected, correct password opens app, incomplete durable configuration fails closed. |
+| D1 adapter | Actual SQL CRUD and owner isolation tested with an in-memory SQLite database and mocked D1 API transport. No live account credentials were used. |
+| Server startup | Streamlit health endpoint and HTTP application shell both return 200. |
 
-The build emits nonfatal framework warnings about modules imported both statically and dynamically. The pinned Workers runtime supports the selected compatibility date, 2026-05-15.
+The interface uses native Streamlit controls; it is not a pixel-identical React rendering. No live GitHub upload, Streamlit Community Cloud deployment or real D1 API connection is claimed. The durable database connection requires separate validation after the user configures their secrets.
 
-## Still needs live account configuration and verification
+Default storage is per-session and temporary; explicit workspace backup/restore is provided. Optional D1 storage is a single-owner/shared personal workspace, protected by APP_PASSWORD and recommended private platform access. It is not a multi-user account system.
 
-- GitHub repository creation/upload and GitHub Actions execution.
-- Cloudflare database provisioning, remote migration and live deployment.
-- Real Cloudflare Access login/logout and user isolation across two authenticated accounts.
-- Provider searches from the deployed environment with the user's provider settings.
-- Live production save/reload persistence.
-
-No GitHub upload or live Cloudflare deployment is claimed by these preparation checks. Test database contents, credentials, dependencies, build output and caches are excluded from the deliverable.
+Research phases beyond the original Phase 1 features remain roadmap items. No numerical meta-analysis engine or LLM/PDF reader was added.
