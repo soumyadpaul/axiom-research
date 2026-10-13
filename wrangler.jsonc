@@ -13,7 +13,7 @@
     {
       "binding": "DB",
       "database_name": "axiom-db",
-      "database_id": "00000000-0000-4000-8000-000000000000",
+      "database_id": "d61aa039-8095-4085-b972-2faf1010b0e1",
       "migrations_dir": "drizzle"
     }
   ],
